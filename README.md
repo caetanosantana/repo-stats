@@ -1,7 +1,19 @@
 
 
-## Iniciando
+## Baixando o projeto
+Primeiro realize o comando a seguir para clonar o projeto em sua máquina
 
+```bash
+git clone https://github.com/caetanosantana/repo-stats.git
+```
+
+Em seguida entre no diretório do projeto utilizando
+
+```bash
+cd repo-stats
+```
+
+## Iniciando o projeto
 Primeiro realize o comando a seguir para baixar as dependencias do projeto
 
 ```bash
