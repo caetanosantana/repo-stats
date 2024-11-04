@@ -1,17 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
 import { Line } from 'react-chartjs-2'
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  Title, 
-  Tooltip, 
-  Legend 
-} from 'chart.js'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 
@@ -25,21 +15,13 @@ ChartJS.register(
   Legend
 )
 
-export function GraficoEstrelas({
-  dados,
-  agruparPor,
-  tipoGrafico,
-  intervaloTempo,
-  onAgruparChange,
-  onTipoChange,
-  onTempoChange}
-) {
+export function GraficoEstrelas({dados, agruparPor, tipoGrafico, intervaloTempo, onAgruparChange, onTipoChange, onTempoChange}) {
   
-  const dadosProcessados = useMemo(() => {
+  function filtrarPorIntervalo(dados: any[], intervalo: string) {
     const agora = new Date()
-    const dadosFiltrados = dados.filter(d => {
-      const data = new Date(d.date)
-      switch (intervaloTempo) {
+    return dados.filter(d => {
+      const data = new Date(d.data)
+      switch (intervalo) {
         case '30d':
           return (agora.getTime() - data.getTime()) <= 30 * 24 * 60 * 60 * 1000
         case '6m':
@@ -50,37 +32,44 @@ export function GraficoEstrelas({
           return true
       }
     })
+  }
 
-    const dadosAgrupados = dadosFiltrados.reduce((acc, curr) => {
-      const data = new Date(curr.date)
-      let chave
+  function obterChaveAgrupamento(data: Date, tipoAgrupamento: string) {
+    switch (tipoAgrupamento) {
+      case 'dia':
+        return data.toISOString().split('T')[0]
+      case 'semana':
+        const inicioSemana = new Date(data)
+        inicioSemana.setDate(data.getDate() - data.getDay())
+        return inicioSemana.toISOString().split('T')[0]
+      case 'mes':
+        return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`
+      case 'ano':
+        return data.getFullYear().toString()
+      default:
+        return ''
+    }
+  }
 
-      switch (agruparPor) {
-        case 'dia':
-          chave = curr.date
-          break
-        case 'semana':
-          const inicioSemana = new Date(data.setDate(data.getDate() - data.getDay()))
-          chave = inicioSemana.toISOString().split('T')[0]
-          break
-        case 'mes':
-          chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`
-          break
-        case 'ano':
-          chave = data.getFullYear().toString()
-          break
-      }
-
+  function agruparDados(dados: any[], tipoAgrupamento: string, tipoGrafico: string) {
+    return dados.reduce((acc, curr) => {
+      const data = new Date(curr.data)
+      const chave = obterChaveAgrupamento(data, tipoAgrupamento)
+      
       if (!acc[chave]) {
         acc[chave] = { date: chave, stars: 0 }
       }
-      acc[chave].stars += tipoGrafico === 'absoluto' ? 1 : curr.stars
+
+      acc[chave].stars += tipoGrafico === 'absoluto' ? 1 : curr.estrelas
       return acc
     }, {} as Record<string, { date: string; stars: number }>)
+  }
 
-    return Object.values(dadosAgrupados).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-  }, [dados, agruparPor, tipoGrafico, intervaloTempo])
+  const dadosFiltrados = filtrarPorIntervalo(dados, intervaloTempo)
+  const dadosAgrupados = agruparDados(dadosFiltrados, agruparPor, tipoGrafico)
+  const dadosProcessados = Object.values(dadosAgrupados).sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
 
   const dadosGrafico = {
     labels: dadosProcessados.map(d => d.date),
@@ -112,7 +101,7 @@ export function GraficoEstrelas({
           </Select>
         </div>
         <div>
-          <Label htmlFor="tipo">Tipo</Label>
+          <Label htmlFor="tipo" className='font-bold'>Tipo</Label>
           <Select value={tipoGrafico} onValueChange={onTipoChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Tipo do Gráfico" />
@@ -124,7 +113,7 @@ export function GraficoEstrelas({
           </Select>
         </div>
         <div>
-          <Label htmlFor="periodo">Período</Label>
+          <Label htmlFor="periodo" className='font-bold'>Período</Label>
           <Select value={intervaloTempo} onValueChange={onTempoChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Intervalo de Tempo" />

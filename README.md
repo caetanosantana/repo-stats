@@ -1,14 +1,27 @@
 
 
-## Iniciando
+## Baixando o projeto
 
-Primeiro realize o comando a seguir para baixar as dependencias do projeto
+1. **Clone o repositório:**
+utilize o comando a seguir para clonar o projeto em sua máquina
+
+```bash
+git clone https://github.com/caetanosantana/repo-stats.git
+```
+2. **Navegue até o diretório do projeto:**
+utilize o comando
+
+```bash
+cd repo-stats
+```
+3. **Instale as dependências:**
+utilize o comando a seguir para baixar as dependencias do projeto
 
 ```bash
 npm install
 ```
-
-Em seguida utilize o comando a seguir para iniciar o projeto
+## Iniciando o projeto
+ Para iniciar o projeto utilize o comando a seguir
 
 ```bash
 npm run dev
